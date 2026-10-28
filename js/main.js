@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initIntroSequence();
   initHeroVideo();
   initNavbar();
+  initSmoothScrolling();
+  initTextScrollReveal();
   initGallery();
   initLightbox();
   initVideoPlayer();
@@ -93,8 +95,8 @@ function initHeroVideo() {
    ========================================================================== */
 function initNavbar() {
   const header = document.querySelector('.site-header');
-  const menuToggle = document.querySelector('.menu-toggle');
-  const navLinks = document.querySelector('.nav-links');
+  const menuToggle = document.getElementById('menu-toggle') || document.querySelector('.menu-toggle');
+  const navLinks = document.getElementById('nav-links') || document.querySelector('.nav-links');
 
   window.addEventListener('scroll', () => {
     if (window.scrollY > 40) {
@@ -107,149 +109,416 @@ function initNavbar() {
   });
 
   if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('mobile-open');
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = navLinks.classList.toggle('mobile-open');
+      menuToggle.classList.toggle('is-active', isOpen);
+      menuToggle.setAttribute('aria-expanded', isOpen);
     });
 
     navLinks.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('mobile-open');
+        menuToggle.classList.remove('is-active');
+        menuToggle.setAttribute('aria-expanded', 'false');
       });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target) && navLinks.classList.contains('mobile-open')) {
+        navLinks.classList.remove('mobile-open');
+        menuToggle.classList.remove('is-active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 }
 
 /* ==========================================================================
-   3. GALLERY ENGINE (Instagram Feed & Grid)
+   2.1 SMOOTH SCROLLING (Animación cinemática fluida con requestAnimationFrame)
+   Garantiza desplazamiento suave real en PC y móvil, incluyendo el logo al inicio
    ========================================================================== */
-let currentPhotos = typeof GALLERY_DATA !== 'undefined' ? GALLERY_DATA : [];
-let currentLayout = 'grid'; // 'grid' | 'masonry'
+function animateVerticalScroll(targetY, duration = 650) {
+  const startY = window.pageYOffset || document.documentElement.scrollTop;
+  const distance = targetY - startY;
+  if (Math.abs(distance) < 2) return;
 
-function initGallery() {
-  const container = document.getElementById('gallery-grid');
-  const countBadge = document.getElementById('photo-counter');
-  const btnGrid = document.getElementById('btn-view-grid');
-  const btnMasonry = document.getElementById('btn-view-masonry');
+  let startTime = null;
 
-  if (!container) return;
-
-  if (countBadge) {
-    countBadge.textContent = `${currentPhotos.length} fotos`;
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  // Render photo cards
-  renderGallery(container);
+  function step(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = easeInOutCubic(progress);
 
-  // Layout switcher
-  if (btnGrid && btnMasonry) {
-    btnGrid.addEventListener('click', () => {
-      btnGrid.classList.add('active');
-      btnMasonry.classList.remove('active');
-      container.classList.remove('view-masonry');
-      currentLayout = 'grid';
-    });
+    window.scrollTo(0, startY + (distance * ease));
 
-    btnMasonry.addEventListener('click', () => {
-      btnMasonry.classList.add('active');
-      btnGrid.classList.remove('active');
-      container.classList.add('view-masonry');
-      currentLayout = 'masonry';
-    });
+    if (elapsed < duration) {
+      window.requestAnimationFrame(step);
+    } else {
+      window.scrollTo(0, targetY);
+    }
   }
+
+  window.requestAnimationFrame(step);
 }
 
-function renderGallery(container) {
-  container.innerHTML = '';
+function initSmoothScrolling() {
+  const internalLinks = document.querySelectorAll('a[href^="#"]');
 
-  currentPhotos.forEach((photo, index) => {
-    const card = document.createElement('article');
-    card.className = 'photo-card';
-    card.setAttribute('data-id', photo.id);
-    card.setAttribute('data-index', index);
+  internalLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href');
+      if (!targetId) return;
 
-    // Apply portrait class if portrait or within first 4 photos to strictly preserve heads
-    if (photo.aspect === 'portrait' || index < 4) {
-      card.classList.add('is-portrait');
+      // Click en el logo o enlaces que van al inicio (# o #top)
+      if (targetId === '#' || targetId === '#top') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const startY = window.pageYOffset || document.documentElement.scrollTop;
+        if (startY <= 0) return;
+
+        animateVerticalScroll(0, 750);
+        return;
+      }
+
+      const targetSection = document.querySelector(targetId);
+      if (targetSection) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const headerOffset = 75;
+        const startY = window.pageYOffset || document.documentElement.scrollTop;
+        const targetRect = targetSection.getBoundingClientRect();
+        const targetY = Math.max(0, targetRect.top + startY - headerOffset);
+
+        animateVerticalScroll(targetY, 750);
+      }
+    });
+  });
+}
+
+/* ==========================================================================
+   2.2 TEXT SCROLL REVEAL (Aparición progresiva fluida de textos en scroll)
+   ========================================================================== */
+function initTextScrollReveal() {
+  const textElements = document.querySelectorAll('.reveal-text');
+  if (!textElements.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    textElements.forEach(el => el.classList.add('is-revealed'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-revealed');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, {
+    root: null,
+    threshold: 0.08,
+    rootMargin: '0px 0px -30px 0px'
+  });
+
+  textElements.forEach(el => observer.observe(el));
+}
+
+/* ==========================================================================
+   3. GALLERY ENGINE (Carousel Horizontal, 4 en Móvil 2x2, 9 en PC 3x3)
+   ========================================================================== */
+let currentPhotos = typeof GALLERY_DATA !== 'undefined' ? GALLERY_DATA : [];
+let currentSlideIndex = 0;
+let isMobile = window.innerWidth <= 768;
+let itemsPerSlide = isMobile ? 4 : 9; // PC: 3 columnas x 3 filas = 9 fotos
+let totalSlides = Math.ceil(currentPhotos.length / itemsPerSlide);
+
+function initGallery() {
+  const viewport = document.getElementById('gallery-viewport');
+  const track = document.getElementById('gallery-track');
+  const btnPrev = document.getElementById('btn-page-prev');
+  const btnNext = document.getElementById('btn-page-next');
+  const sidePrev = document.getElementById('gallery-prev-btn');
+  const sideNext = document.getElementById('gallery-next-btn');
+  const paginationPages = document.getElementById('pagination-pages');
+  const badgePage = document.getElementById('gallery-page-indicator-badge');
+  const badgeCounter = document.getElementById('photo-counter');
+
+  if (!viewport || !track) return;
+
+  if (badgeCounter) {
+    badgeCounter.textContent = `${currentPhotos.length} fotos`;
+  }
+
+  function setupSlides() {
+    isMobile = window.innerWidth <= 768;
+    itemsPerSlide = isMobile ? 4 : 9; // PC: 9 fotos (3x3), Móvil: 4 fotos (2x2)
+    totalSlides = Math.ceil(currentPhotos.length / itemsPerSlide);
+    currentSlideIndex = Math.min(currentSlideIndex, totalSlides - 1);
+
+    track.innerHTML = '';
+
+    for (let s = 0; s < totalSlides; s++) {
+      const slide = document.createElement('div');
+      slide.className = 'gallery-slide';
+      slide.setAttribute('data-slide', s);
+
+      const start = s * itemsPerSlide;
+      const end = Math.min(start + itemsPerSlide, currentPhotos.length);
+
+      for (let i = start; i < end; i++) {
+        const photo = currentPhotos[i];
+        if (!photo) continue;
+
+        const card = createPhotoCard(photo, i);
+        slide.appendChild(card);
+      }
+
+      track.appendChild(slide);
     }
 
-    // Local storage like persistence
-    const isLiked = localStorage.getItem(`like_${photo.id}`) === 'true';
+    renderPaginationControls();
+    updatePaginationUI();
 
-    card.innerHTML = `
-      <div class="photo-image-wrapper">
-        <img 
-          src="${photo.thumb}" 
-          alt="${photo.title}" 
-          class="photo-thumb" 
-          loading="lazy" 
-          decoding="async"
-          style="object-position: top center;"
-        />
-        <div class="photo-overlay">
-          <div class="overlay-top">
-            <button class="overlay-icon-btn btn-open-lightbox" title="Ampliar imagen" aria-label="Ampliar imagen">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-            </button>
-            <a href="${photo.full}" download="${photo.filename}" class="overlay-icon-btn" title="Descargar original" aria-label="Descargar original" onclick="event.stopPropagation()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            </a>
-          </div>
-          <div class="overlay-bottom">
-            <div class="photo-meta-info">
-              <span class="photo-id-title">${photo.title}</span>
-              <span class="photo-aspect-tag">${photo.aspect} &bull; ${photo.width}x${photo.height}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="instagram-meta-bar">
-        <div class="meta-actions">
-          <button class="insta-icon-btn btn-like ${isLiked ? 'liked' : ''}" title="Me gusta">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="${isLiked ? '#ffffff' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            <span class="like-label">${isLiked ? '1' : '0'}</span>
-          </button>
-          <button class="insta-icon-btn btn-share-photo" title="Copiar enlace directo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-        </div>
-        <a href="${photo.full}" download="${photo.filename}" class="btn-download-card" onclick="event.stopPropagation()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          <span>Descargar</span>
-        </a>
-      </div>
-    `;
-
-    // Click on card opens lightbox
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('a') || e.target.closest('.btn-like') || e.target.closest('.btn-share-photo')) return;
-      openLightbox(index);
+    viewport.scrollTo({
+      left: currentSlideIndex * viewport.clientWidth,
+      behavior: 'auto'
     });
 
-    // Like button interaction
-    const likeBtn = card.querySelector('.btn-like');
-    likeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const current = localStorage.getItem(`like_${photo.id}`) === 'true';
-      const next = !current;
-      localStorage.setItem(`like_${photo.id}`, next);
-      
-      likeBtn.classList.toggle('liked', next);
-      likeBtn.querySelector('svg').setAttribute('fill', next ? '#ffffff' : 'none');
-      likeBtn.querySelector('.like-label').textContent = next ? '1' : '0';
-    });
+    // Ajustar altura inicial del viewport al slide activo
+    setTimeout(updateViewportHeight, 50);
+  }
 
-    // Share photo interaction
-    const shareBtn = card.querySelector('.btn-share-photo');
-    shareBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const photoUrl = window.location.origin + window.location.pathname + '#' + photo.filename;
-      navigator.clipboard.writeText(photoUrl).then(() => {
-        showToast('Enlace de fotografía copiado al portapapeles');
+  function updateViewportHeight() {
+    const currentSlide = track.querySelector(`.gallery-slide[data-slide="${currentSlideIndex}"]`);
+    if (currentSlide) {
+      const slideH = currentSlide.offsetHeight;
+      if (slideH > 0) {
+        viewport.style.height = `${slideH}px`;
+      }
+    }
+  }
+
+  function renderPaginationControls() {
+    if (!paginationPages) return;
+    paginationPages.innerHTML = '';
+
+    if (isMobile) {
+      // En móvil: Indicador compacto "Pág. X / Y"
+      const indicator = document.createElement('div');
+      indicator.className = 'page-indicator-mobile';
+      indicator.id = 'page-indicator-mobile-text';
+      indicator.textContent = `Pág. ${currentSlideIndex + 1} / ${totalSlides}`;
+      paginationPages.appendChild(indicator);
+    } else {
+      // En PC: Botones numéricos [ 1 ] [ 2 ] [ 3 ] ...
+      for (let s = 0; s < totalSlides; s++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-number-btn ${s === currentSlideIndex ? 'active' : ''}`;
+        pageBtn.setAttribute('data-page', s);
+        pageBtn.setAttribute('aria-label', `Ir a página ${s + 1}`);
+        pageBtn.textContent = s + 1;
+
+        pageBtn.addEventListener('click', () => {
+          goToSlide(s, true);
+        });
+
+        paginationPages.appendChild(pageBtn);
+      }
+    }
+  }
+
+  function updatePaginationUI() {
+    // Actualizar botones numéricos
+    if (!isMobile && paginationPages) {
+      const btns = paginationPages.querySelectorAll('.page-number-btn');
+      btns.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === currentSlideIndex);
       });
-    });
+    } else if (isMobile) {
+      const indicator = document.getElementById('page-indicator-mobile-text');
+      if (indicator) {
+        indicator.textContent = `Pág. ${currentSlideIndex + 1} / ${totalSlides}`;
+      }
+    }
 
-    container.appendChild(card);
+    // Actualizar badge superior
+    if (badgePage) {
+      badgePage.textContent = `Pág. ${currentSlideIndex + 1} de ${totalSlides}`;
+    }
+
+    // Habilitar / deshabilitar flechas
+    const isFirst = currentSlideIndex <= 0;
+    const isLast = currentSlideIndex >= totalSlides - 1;
+
+    if (btnPrev) btnPrev.disabled = isFirst;
+    if (btnNext) btnNext.disabled = isLast;
+    if (sidePrev) sidePrev.disabled = isFirst;
+    if (sideNext) sideNext.disabled = isLast;
+  }
+
+  function goToSlide(slideIdx, shouldScrollUp = true) {
+    currentSlideIndex = Math.max(0, Math.min(slideIdx, totalSlides - 1));
+    const targetScroll = currentSlideIndex * viewport.clientWidth;
+    viewport.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+    updatePaginationUI();
+    updateViewportHeight();
+
+    // Al cambiar de página, subir directamente a la cuadrícula de fotos principales (sin subir hasta el título)
+    if (shouldScrollUp) {
+      const carouselWrapper = document.querySelector('.gallery-carousel-wrapper') || document.getElementById('gallery-viewport');
+      if (carouselWrapper) {
+        const headerOffset = 80;
+        const targetY = Math.max(0, carouselWrapper.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) - headerOffset);
+        const currentY = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (Math.abs(currentY - targetY) > 20) {
+          animateVerticalScroll(targetY, 550);
+        }
+      }
+    }
+  }
+
+  // Eventos de botones
+  if (btnPrev) btnPrev.addEventListener('click', () => goToSlide(currentSlideIndex - 1, true));
+  if (btnNext) btnNext.addEventListener('click', () => goToSlide(currentSlideIndex + 1, true));
+  if (sidePrev) sidePrev.addEventListener('click', () => goToSlide(currentSlideIndex - 1, true));
+  if (sideNext) sideNext.addEventListener('click', () => goToSlide(currentSlideIndex + 1, true));
+
+  // Detección de desplazamiento nativo táctil (touch swipe en móvil)
+  let scrollTimeout = null;
+  viewport.addEventListener('scroll', () => {
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const width = viewport.clientWidth;
+      if (width > 0) {
+        const detectedIndex = Math.round(viewport.scrollLeft / width);
+        if (detectedIndex !== currentSlideIndex && detectedIndex >= 0 && detectedIndex < totalSlides) {
+          currentSlideIndex = detectedIndex;
+          updatePaginationUI();
+          updateViewportHeight();
+        }
+      }
+    }, 60);
+  }, { passive: true });
+
+  // Manejo de cambio de resolución (resize)
+  let resizeTimeout = null;
+  window.addEventListener('resize', () => {
+    if (resizeTimeout) clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const nowMobile = window.innerWidth <= 768;
+      if (nowMobile !== isMobile) {
+        setupSlides();
+      } else {
+        viewport.scrollTo({
+          left: currentSlideIndex * viewport.clientWidth,
+          behavior: 'auto'
+        });
+        updateViewportHeight();
+      }
+    }, 150);
   });
+
+  // Inicializar slides
+  setupSlides();
+}
+
+function createPhotoCard(photo, index) {
+  const card = document.createElement('article');
+  card.className = 'photo-card';
+  card.setAttribute('data-id', photo.id);
+  card.setAttribute('data-index', index);
+
+  if (photo.aspect === 'portrait' || index < 4) {
+    card.classList.add('is-portrait');
+  }
+
+  const isLiked = localStorage.getItem(`like_${photo.id}`) === 'true';
+
+  card.innerHTML = `
+    <div class="photo-image-wrapper">
+      <img 
+        src="${photo.thumb}" 
+        alt="${photo.title}" 
+        class="photo-thumb" 
+        decoding="async"
+        style="object-position: top center !important;"
+      />
+      <div class="photo-overlay">
+        <div class="overlay-top">
+          <button class="overlay-icon-btn btn-open-lightbox" title="Ampliar imagen" aria-label="Ampliar imagen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+          <a href="${photo.full}" download="${photo.filename}" class="overlay-icon-btn" title="Descargar original" aria-label="Descargar original" onclick="event.stopPropagation()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          </a>
+        </div>
+        <div class="overlay-bottom">
+          <div class="photo-meta-info">
+            <span class="photo-id-title">${photo.title}</span>
+            <span class="photo-aspect-tag">${photo.aspect} &bull; ${photo.width}x${photo.height}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="instagram-meta-bar">
+      <div class="meta-actions">
+        <button class="insta-icon-btn btn-like ${isLiked ? 'liked' : ''}" title="Me gusta">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="${isLiked ? '#ffffff' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="like-label">${isLiked ? '1' : '0'}</span>
+        </button>
+        <button class="insta-icon-btn btn-share-photo" title="Copiar enlace directo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+      <a href="${photo.full}" download="${photo.filename}" class="btn-download-card" onclick="event.stopPropagation()" title="Descargar imagen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span>Descargar</span>
+      </a>
+    </div>
+  `;
+
+  // Click en la tarjeta abre el visor Lightbox
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('a') || e.target.closest('.btn-like') || e.target.closest('.btn-share-photo')) return;
+    openLightbox(index);
+  });
+
+  // Interacción botón de Like
+  const likeBtn = card.querySelector('.btn-like');
+  likeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const current = localStorage.getItem(`like_${photo.id}`) === 'true';
+    const next = !current;
+    localStorage.setItem(`like_${photo.id}`, next);
+    
+    likeBtn.classList.toggle('liked', next);
+    likeBtn.querySelector('svg').setAttribute('fill', next ? '#ffffff' : 'none');
+    likeBtn.querySelector('.like-label').textContent = next ? '1' : '0';
+  });
+
+  // Interacción compartir enlace
+  const shareBtn = card.querySelector('.btn-share-photo');
+  shareBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const photoUrl = window.location.origin + window.location.pathname + '#' + photo.filename;
+    navigator.clipboard.writeText(photoUrl).then(() => {
+      showToast('Enlace de fotografía copiado al portapapeles');
+    });
+  });
+
+  return card;
 }
 
 /* ==========================================================================
