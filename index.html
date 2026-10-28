@@ -61,20 +61,40 @@
         </div>
       </a>
 
-      <ul class="nav-links">
-        <li><a href="#galeria" class="nav-link">Fotografías</a></li>
-        <li><a href="#video" class="nav-link">Video del Evento</a></li>
-        <li><a href="#contacto" class="nav-link">Agencia</a></li>
+      <ul class="nav-links" id="nav-links">
+        <li class="nav-item">
+          <a href="#galeria" class="nav-link">
+            <span class="nav-num">01</span>
+            <span class="nav-text">Fotografías</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#video" class="nav-link">
+            <span class="nav-num">02</span>
+            <span class="nav-text">Video del Evento</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#contacto" class="nav-link">
+            <span class="nav-num">03</span>
+            <span class="nav-text">Agencia</span>
+          </a>
+        </li>
       </ul>
 
       <div class="nav-actions">
-        <a href="https://wa.me/526182103942?text=Hola%20BlueBerry%20Digital,%20los%20contacto%20desde%20la%20plataforma%20de%20la%20graduaci%C3%B3n%20EETA" target="_blank" rel="noopener noreferrer" class="btn-primary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          WhatsApp
+        <a href="https://wa.me/526182103942?text=Hola%20BlueBerry%20Digital,%20los%20contacto%20desde%20la%20plataforma%20de%20la%20graduaci%C3%B3n%20EETA" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-icon" aria-label="Contactar por WhatsApp" title="WhatsApp BlueBerry Digital">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.301-.15-1.78-.879-2.056-.98-.276-.1-.477-.15-.678.15-.2.301-.777.98-.953 1.181-.176.2-.351.226-.653.075-.301-.15-1.272-.469-2.424-1.496-.895-.798-1.5-1.784-1.675-2.085-.176-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.15-.176.2-.301.301-.502.1-.2.05-.377-.025-.527-.075-.15-.678-1.634-.929-2.238-.244-.588-.493-.509-.678-.518l-.578-.01c-.2 0-.527.075-.803.377s-1.054 1.03-1.054 2.512c0 1.482 1.079 2.912 1.23 3.113.15.2 2.124 3.243 5.146 4.55.719.311 1.28.497 1.718.636.722.23 1.378.197 1.9.12.58-.088 1.78-.728 2.03-1.431.25-.703.25-1.306.176-1.431-.075-.126-.276-.201-.577-.351z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.174L2 22l4.981-1.408A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.62 0-3.125-.49-4.385-1.332l-.314-.209-2.955.835.845-2.885-.229-.333A8.17 8.17 0 0 1 3.8 12c0-4.522 3.678-8.2 8.2-8.2 4.522 0 8.2 3.678 8.2 8.2 0 4.522-3.678 8.2-8.2 8.2z"/>
+          </svg>
         </a>
-      </div>
 
-      <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">&#9776;</button>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-expanded="false">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -96,14 +116,14 @@
       <div class="hero-noise-overlay"></div>
 
       <div class="hero-container">
-        <div class="hero-badge-container">
+        <div class="hero-badge-container reveal-text">
           <span class="badge-dot"></span>
           <span class="badge-text">25 de Octubre de 2026 &bull; Ceremonia Solemne</span>
         </div>
 
-        <h1 class="hero-title">Graduación 2026 EETA</h1>
+        <h1 class="hero-title reveal-text reveal-delay-1">Graduación 2026 EETA</h1>
 
-        <p class="hero-description">
+        <p class="hero-description reveal-text reveal-delay-2">
           Memoria audiovisual oficial del egreso de la Escuela de Especialidades Técnico Automotriz. Revive cada momento, descarga tus fotografías en máxima fidelidad y disfruta del cortometraje cinematográfico conmemorativo.
         </p>
 
@@ -140,9 +160,9 @@
          ====================================================================== -->
     <section id="galeria" class="gallery-section">
       <div class="section-header">
-        <p class="section-eyebrow">Memoria Gráfica</p>
-        <h2 class="section-title">Galería de Graduación</h2>
-        <p class="section-subtitle">
+        <p class="section-eyebrow reveal-text">Memoria Gráfica</p>
+        <h2 class="section-title reveal-text reveal-delay-1">Galería de Graduación</h2>
+        <p class="section-subtitle reveal-text reveal-delay-2">
           Haz clic en cualquier imagen para abrir el visor en alta resolución o descárgala en tu dispositivo.
         </p>
       </div>
@@ -151,23 +171,42 @@
         <div class="gallery-count-badge">
           <span>Catálogo oficial:</span>
           <span id="photo-counter" class="count-indicator">57 fotos</span>
-        </div>
-
-        <div class="gallery-view-controls">
-          <button id="btn-view-grid" class="view-btn active" title="Cuadrícula estilo Instagram">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Cuadrícula
-          </button>
-          <button id="btn-view-masonry" class="view-btn" title="Vista fluida de proporciones">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="11"/><rect x="14" y="3" width="7" height="6"/><rect x="14" y="13" width="7" height="8"/><rect x="3" y="17" width="7" height="4"/></svg>
-            Mosaico
-          </button>
+          <span id="gallery-page-indicator-badge" class="count-indicator">Página 1</span>
         </div>
       </div>
 
-      <!-- Photo Grid Dynamic Container -->
-      <div id="gallery-grid" class="gallery-grid">
-        <!-- Rendered via JS and GALLERY_DATA -->
+      <!-- Carrusel de Galería con Desplazamiento Suave Horizontal -->
+      <div class="gallery-carousel-wrapper">
+        <button id="gallery-prev-btn" class="gallery-nav-arrow arrow-left" aria-label="Página anterior" title="Página anterior">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <div id="gallery-viewport" class="gallery-viewport">
+          <div id="gallery-track" class="gallery-track">
+            <!-- Slides generadas dinámicamente por JS -->
+          </div>
+        </div>
+
+        <button id="gallery-next-btn" class="gallery-nav-arrow arrow-right" aria-label="Página siguiente" title="Página siguiente">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Barra Interactiva de Paginación y Selector de Páginas -->
+      <div class="gallery-pagination-wrapper">
+        <button id="btn-page-prev" class="pagination-btn pagination-nav" aria-label="Página anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <span class="pagination-btn-text">Anterior</span>
+        </button>
+
+        <div id="pagination-pages" class="pagination-pages">
+          <!-- Botones numéricos generados dinámicamente por JS -->
+        </div>
+
+        <button id="btn-page-next" class="pagination-btn pagination-nav" aria-label="Página siguiente">
+          <span class="pagination-btn-text">Siguiente</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </section>
 
@@ -177,9 +216,9 @@
          ====================================================================== -->
     <section id="video" class="video-section">
       <div class="section-header">
-        <p class="section-eyebrow">Cinematografía</p>
-        <h2 class="section-title">Video del Evento</h2>
-        <p class="section-subtitle">
+        <p class="section-eyebrow reveal-text">Cinematografía</p>
+        <h2 class="section-title reveal-text reveal-delay-1">Video del Evento</h2>
+        <p class="section-subtitle reveal-text reveal-delay-2">
           Revive los discursos, la entrega de reconocimientos y el festejo de los graduados en formato cinematográfico.
         </p>
       </div>
@@ -212,7 +251,7 @@
         </div>
 
         <div class="video-source-bar">
-          <div class="source-details">
+          <div class="source-details reveal-text">
             <span class="source-title">Graduación EETA 2026 - Película Oficial</span>
             <span class="source-meta">Transmisión HD en YouTube &bull; Descarga original en Google Drive (~2.99 GB)</span>
           </div>
@@ -240,7 +279,7 @@
         </div>
 
         <!-- Advertencia de consumo de datos -->
-        <div class="video-notice-card">
+        <div class="video-notice-card reveal-text">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <div class="video-notice-text">
             <strong>Advertencia de consumo de datos:</strong> El archivo descargable de este video cinematográfico pesa aproximadamente <strong>3 GB</strong>. Te recomendamos descargarlo en una <strong>PC o laptop conectada a una red Wi-Fi estable</strong> para evitar consumir el plan de datos móviles de tu dispositivo.
@@ -256,15 +295,11 @@
     <section id="contacto" class="agency-section">
       <div class="agency-card">
         <div class="agency-info">
-          <div class="agency-brand-badge">
-            <span class="badge-dot"></span>
-            <span>Agencia Productora</span>
-          </div>
-          <img src="images/logo_white.png" alt="Logo BlueBerry Digital" class="agency-logo-large" />
-          <p class="agency-description">
+          <img src="images/logo_white.png" alt="Logo BlueBerry Digital" class="agency-logo-large reveal-text" />
+          <p class="agency-description reveal-text reveal-delay-1">
             Especialistas en producción audiovisual cinematográfica, fotografía editorial y cobertura integral de eventos sociales, corporativos e institucionales.
           </p>
-          <div class="hero-cta-group" style="justify-content: flex-start; margin-bottom: 0;">
+          <div class="hero-cta-group reveal-text reveal-delay-2" style="justify-content: flex-start; margin-bottom: 0;">
             <button id="btn-copy-site" class="btn-secondary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               Compartir Sitio
